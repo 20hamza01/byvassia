@@ -1,7 +1,8 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { SESSION_COOKIE } from "./session";
 
-export const SESSION_COOKIE = "vassia_admin";
+export { SESSION_COOKIE };
 
 function secret(): Uint8Array {
   const s = process.env.JWT_SECRET;

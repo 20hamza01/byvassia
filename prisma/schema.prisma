@@ -1,16 +1,15 @@
 // VASSIA Candles & Scents — data model
-// Postgres (Neon). DATABASE_URL = pooled connection (used by the app at
-// runtime on Vercel). DIRECT_URL = direct connection (used by Prisma for
-// `db push` / migrations, which can't run over the pooled endpoint).
+// Postgres (Neon). Single connection: DATABASE_URL must be the DIRECT
+// (non-pooled) Neon endpoint — its host has NO "-pooler" — so the app and
+// `prisma db push` both work over it.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Product {

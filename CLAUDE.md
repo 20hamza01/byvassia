@@ -58,8 +58,9 @@ run it from the real path or the junction (both resolve the parent).
   column); use `parseImages()` / `lib/products.ts#toDTO` to read. Image
   uploads go to **Vercel Blob** via `app/api/admin/upload/route.ts` (needs
   `BLOB_READ_WRITE_TOKEN`); the stored value is the public blob URL.
-- Prisma datasource uses `url` (Neon **pooled**, runtime) + `directUrl`
-  (Neon **direct**, for `db push`). Both are set in `.env` / Vercel env.
+- Prisma datasource uses a single `url` (`DATABASE_URL`). It must be the
+  Neon **direct** endpoint (host has **no** `-pooler`) so both the app and
+  `prisma db push` work over it. Set it in `.env` and Vercel env.
 - Design tokens (colors, fonts, eyebrow/btn/field classes, grain, candle
   glow) live in `app/globals.css` via Tailwind v4 `@theme`. Fonts:
   Cormorant Garamond (display) + Jost (sans), loaded in `app/layout.tsx`.
@@ -71,8 +72,8 @@ run it from the real path or the junction (both resolve the parent).
   Framer Motion reveals (`components/Reveal.tsx`). No new fonts/colors
   outside the tokens.
 - Prices are whole DH integers; format with `formatDH()` from `lib/format.ts`.
-- After changing `prisma/schema.prisma`: `npm run db:push` (uses `DIRECT_URL`)
-  then it regenerates the client. `postinstall` runs `prisma generate` so
+- After changing `prisma/schema.prisma`: `npm run db:push` then regenerate
+  the client. `postinstall` runs `prisma generate` so
   Vercel builds get a fresh client; the schema itself is pushed manually
   (run `npm run db:push` against Neon after a schema change — it is not part
   of the Vercel build).
