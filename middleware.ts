@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
-import { SESSION_COOKIE } from "@/lib/session";
+import { SESSION_COOKIE } from "./lib/session";
 
 async function valid(token: string | undefined): Promise<boolean> {
   if (!token) return false;
