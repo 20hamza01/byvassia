@@ -1,0 +1,61 @@
+// VASSIA Candles & Scents — data model
+// Postgres (Neon). DATABASE_URL = pooled connection (used by the app at
+// runtime on Vercel). DIRECT_URL = direct connection (used by Prisma for
+// `db push` / migrations, which can't run over the pooled endpoint).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String
+  scentNotes  String // comma-separated, e.g. "Bergamot, Cedar, Amber"
+  priceMAD    Int // whole dirham
+  category    String   @default("CANDLE") // CANDLE | DIFFUSER | ACCESSORY
+  images      String // JSON-encoded string array of image paths
+  stock       Int      @default(0)
+  status      String   @default("ACTIVE") // ACTIVE | DRAFT
+  featured    Boolean  @default(false)
+  weightG     Int? // optional fill weight in grams
+  burnTime    String? // e.g. "40+ hours"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Order {
+  id           String      @id @default(cuid())
+  orderNumber  String      @unique
+  customerName String
+  phone        String
+  email        String?
+  city         String
+  address      String
+  notes        String?
+  subtotalMAD  Int
+  deliveryMAD  Int         @default(0)
+  totalMAD     Int
+  status       String      @default("NEW") // NEW | CONFIRMED | SHIPPED | DELIVERED | CANCELLED
+  items        OrderItem[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model OrderItem {
+  id           String  @id @default(cuid())
+  order        Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId      String
+  productId    String
+  name         String
+  unitPriceMAD Int
+  qty          Int
+  image        String?
+}

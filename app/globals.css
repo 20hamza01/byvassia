@@ -1,0 +1,194 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   VASSIA Candles & Scents — design tokens
+   Luxury / editorial: warm paper, near-black ink, sparing candle-glow gold.
+--------------------------------------------------------------------------- */
+@theme {
+  --color-ivory: #faf6ef;
+  --color-ivory-2: #f2ebde;
+  --color-ink: #1a1815;
+  --color-ink-soft: #4a443c;
+  --color-gold: #c9a24b;
+  --color-gold-soft: #e3c98a;
+  --color-taupe: #8c7a63;
+  --color-line: #d9cfbd;
+
+  --font-display: var(--font-cormorant), Georgia, serif;
+  --font-sans: var(--font-jost), ui-sans-serif, system-ui, sans-serif;
+
+  --ease-luxe: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--color-ivory);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: "kern";
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--color-ink);
+    color: var(--color-ivory);
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  /* Custom focus ring (keyboard only) */
+  :focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 3px;
+  }
+
+  input, textarea, select, button {
+    font-family: inherit;
+  }
+}
+
+@layer components {
+  /* The wide letter-spaced sans label that echoes "CANDLES & SCENTS" */
+  .eyebrow {
+    font-family: var(--font-sans);
+    text-transform: uppercase;
+    letter-spacing: 0.32em;
+    font-size: 0.7rem;
+    font-weight: 400;
+    color: var(--color-taupe);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 1rem 2.4rem;
+    font-family: var(--font-sans);
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    font-size: 0.72rem;
+    border: 1px solid var(--color-ink);
+    background: var(--color-ink);
+    color: var(--color-ivory);
+    cursor: pointer;
+    transition: background 0.5s var(--ease-luxe), color 0.5s var(--ease-luxe),
+      transform 0.5s var(--ease-luxe);
+  }
+  .btn:hover {
+    background: transparent;
+    color: var(--color-ink);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--color-ink);
+  }
+  .btn-ghost:hover {
+    background: var(--color-ink);
+    color: var(--color-ivory);
+  }
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .link-underline {
+    position: relative;
+  }
+  .link-underline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    height: 1px;
+    width: 100%;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.5s var(--ease-luxe);
+  }
+  .link-underline:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  .field {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--color-line);
+    padding: 0.85rem 0;
+    font-size: 0.95rem;
+    color: var(--color-ink);
+    transition: border-color 0.4s var(--ease-luxe);
+  }
+  .field::placeholder {
+    color: var(--color-taupe);
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--color-ink);
+  }
+}
+
+/* Film-grain overlay (atmosphere) */
+.grain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Soft warm candle glow */
+.candle-glow {
+  background: radial-gradient(
+    closest-side,
+    rgba(201, 162, 75, 0.28),
+    rgba(201, 162, 75, 0.08) 55%,
+    transparent 78%
+  );
+  filter: blur(6px);
+}
+
+/* Marquee for the announcement bar */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: marquee 38s linear infinite;
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Thin elegant scrollbar */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--color-ivory); }
+::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border: 3px solid var(--color-ivory);
+  border-radius: 999px;
+}
