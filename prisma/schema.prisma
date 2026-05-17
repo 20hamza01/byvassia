@@ -39,6 +39,9 @@ model Order {
   city         String
   address      String
   notes        String?
+  isGift       Boolean     @default(false)
+  giftMessage  String?
+  giftFeeMAD   Int         @default(0)
   subtotalMAD  Int
   deliveryMAD  Int         @default(0)
   totalMAD     Int

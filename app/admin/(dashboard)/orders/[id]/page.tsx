@@ -69,10 +69,28 @@ export default async function OrderDetail({
             </tbody>
             <tfoot>
               <tr className="border-t border-line">
-                <td colSpan={3} className="p-4 text-taupe">
+                <td colSpan={3} className="p-4 pb-1 text-taupe">
+                  Subtotal
+                </td>
+                <td className="p-4 pb-1 text-right">
+                  {formatDH(order.subtotalMAD)}
+                </td>
+              </tr>
+              {order.isGift && (
+                <tr>
+                  <td colSpan={3} className="px-4 py-1 text-taupe">
+                    Gift wrapping
+                  </td>
+                  <td className="px-4 py-1 text-right">
+                    {formatDH(order.giftFeeMAD)}
+                  </td>
+                </tr>
+              )}
+              <tr>
+                <td colSpan={3} className="px-4 pb-4 pt-1 text-taupe">
                   Total
                 </td>
-                <td className="p-4 text-right font-display text-xl">
+                <td className="px-4 pb-4 pt-1 text-right font-display text-xl">
                   {formatDH(order.totalMAD)}
                 </td>
               </tr>
@@ -118,6 +136,22 @@ export default async function OrderDetail({
               )}
             </dl>
           </div>
+
+          {order.isGift && (
+            <div className="border border-ember/40 bg-ember/5 p-7">
+              <p className="eyebrow eyebrow-tick">🎁 Gift order</p>
+              <p className="mt-4 text-sm text-taupe">
+                Gift wrapping &amp; card — {formatDH(order.giftFeeMAD)}
+              </p>
+              {order.giftMessage ? (
+                <p className="mt-3 whitespace-pre-wrap border-l-2 border-ember/50 pl-4 font-display text-lg italic">
+                  “{order.giftMessage}”
+                </p>
+              ) : (
+                <p className="mt-3 text-sm text-taupe">No card message.</p>
+              )}
+            </div>
+          )}
 
           <div className="border border-line p-7">
             <OrderStatusSelect orderId={order.id} current={order.status} />

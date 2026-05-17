@@ -1,3 +1,10 @@
+/**
+ * Flat fee added when an order is sent as a gift (wrapping + card).
+ * Authoritative value — the orders API recomputes the total with this;
+ * the client only uses it for display.
+ */
+export const GIFT_FEE_MAD = 30;
+
 /** Format a whole-dirham amount, e.g. 180 -> "180 DH". */
 export function formatDH(amount: number): string {
   return `${new Intl.NumberFormat("fr-MA").format(Math.round(amount))} DH`;

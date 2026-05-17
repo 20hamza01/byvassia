@@ -1,0 +1,472 @@
+// VASSIA — lightweight bilingual dictionary (EN default, FR opt-in).
+// Server components read the locale cookie via lib/locale-server; client
+// components use the LanguageProvider context. Product content (names,
+// descriptions, scent notes) is admin-entered and is NOT translated here.
+
+export type Locale = "en" | "fr";
+
+export const LOCALES: Locale[] = ["en", "fr"];
+export const DEFAULT_LOCALE: Locale = "en";
+export const LANG_COOKIE = "vassia-lang";
+
+export function normalizeLocale(value?: string | null): Locale {
+  return value === "fr" ? "fr" : "en";
+}
+
+const en = {
+  nav: {
+    shop: "Shop",
+    atelier: "Atelier",
+    contact: "Contact",
+    journal: "Journal",
+    cart: "Cart",
+    menu: "Menu",
+  },
+  hero: {
+    eyebrow: "Hand-poured soy · Small batch · Morocco",
+    titleA: "Light the",
+    titleB: "quiet hours.",
+    body: "Soy candles poured slowly by hand, marbled as they cure, and scented with intention. Made in small batches — never rushed.",
+    shop: "Shop the collection",
+    atelier: "Our atelier",
+    scroll: "Scroll",
+  },
+  marquee: [
+    "Hand-poured in small batches",
+    "100% soy wax",
+    "Marbled by hand",
+    "Cash on delivery across Morocco",
+    "Order by WhatsApp",
+  ],
+  home: {
+    signaturesEyebrow: "The signatures",
+    signaturesTitleA: "Scents we return to,",
+    signaturesTitleB: "again and again.",
+    viewAll: "View all",
+    noProducts: "No products yet — add them in the admin dashboard.",
+    atelierEyebrow: "The atelier",
+    atelierTitleA: "Poured at the edge",
+    atelierTitleB: "of warmth.",
+    atelierBody:
+      "We melt slowly, let the wax cool to exactly where fragrance binds best, and pour into warmed glass so the surface sets smooth. After a day of curing, each candle is marbled by hand — no two are alike.",
+    atelierLink: "Read the process",
+    familiesEyebrow: "Find your scent",
+    familiesTitleA: "Four ways to",
+    familiesTitleB: "read a room.",
+    families: [
+      { t: "Warm & Resinous", d: "Amber, oud, tonka" },
+      { t: "Green & Fresh", d: "Fig, sea salt, stem" },
+      { t: "Floral & Powdery", d: "May rose, peony, musk" },
+      { t: "Dark & Smoked", d: "Tobacco, honey, hay" },
+    ],
+  },
+  shop: {
+    eyebrow: "All candles · Spring 2026",
+    titleA: "The",
+    titleB: "Candles",
+    subtitle:
+      "Hand-poured soy compositions. Each candle wears a small ember mark — the family it belongs to.",
+    empty: "Nothing here yet.",
+  },
+  card: {
+    bestseller: "Bestseller",
+    limited: "Limited",
+    soldOut: "Sold out",
+    soy: "Soy",
+    discover: "Discover",
+  },
+  product: {
+    back: "← Back to collection",
+    catCandle: "Soy candle",
+    catDiffuser: "Reed diffuser",
+    catAccessory: "Accessory",
+    scentNotes: "Scent notes",
+    fillWeight: "Fill weight",
+    burnTime: "Burn time",
+    wax: "Wax",
+    waxValue: "100% soy",
+    made: "Made",
+    madeValue: "By hand, small batch",
+    careTitle: "Burn it well",
+    care: [
+      "Trim the wick to 5–6 mm before every burn.",
+      "First burn: let the melt pool reach the edge — about one hour.",
+      "Keep away from drafts; never burn for more than four hours.",
+      "Stop burning when 10 mm of wax remains.",
+    ],
+    related: "You may also like",
+    addToBag: "Add to bag",
+    soldOut: "Sold out",
+    lowStock: (n: number) => `Only ${n} left — small batch.`,
+    decrease: "Decrease quantity",
+    increase: "Increase quantity",
+  },
+  cart: {
+    eyebrow: "Your bag",
+    title: "Review & checkout",
+    empty: "Your bag is empty.",
+    discover: "Discover the collection",
+    remove: "Remove",
+    summary: "Summary",
+    subtotal: "Subtotal",
+    delivery: "Delivery",
+    deliveryValue: "Confirmed by WhatsApp",
+    total: "Total",
+    proceed: "Proceed to checkout",
+    codNote: "Pay cash on delivery · No card required",
+  },
+  drawer: {
+    title: "Your Bag",
+    close: "Close",
+    empty: "Your bag is empty",
+    discover: "Discover the collection",
+    remove: "Remove",
+    subtotal: "Subtotal",
+    deliveryNote: "Delivery confirmed with you by WhatsApp.",
+    checkout: "Checkout",
+  },
+  checkout: {
+    eyebrow: "Checkout",
+    title: "Cash on delivery",
+    intro:
+      "No card needed. Place your order below — we confirm the details and delivery with you directly on WhatsApp.",
+    emptyBag: "Your bag is empty.",
+    backToCollection: "Back to the collection",
+    yourDetails: "Your details",
+    fullName: "Full name",
+    phone: "Phone number",
+    email: "Email (optional)",
+    delivery: "Delivery",
+    selectCity: "Select your city",
+    address: "Full delivery address",
+    notes: "Order notes (optional)",
+    giftLegend: "Send as a gift",
+    giftTitle: "Gift wrapping & card",
+    giftDesc: (fee: string) =>
+      `Hand-wrapped with a written card — ${fee} added to your order.`,
+    giftMessage: "Your gift message (optional) — written on the card",
+    yourOrder: "Your order",
+    subtotal: "Subtotal",
+    giftWrapping: "Gift wrapping",
+    deliveryRow: "Delivery",
+    deliveryValue: "Confirmed on WhatsApp",
+    total: "Total",
+    placing: "Placing order…",
+    placeOrder: "Place order",
+    waNote: "You'll be taken to WhatsApp to confirm. Pay on delivery.",
+    errEmpty: "Your bag is empty.",
+    errGeneric: "Something went wrong. Please try again.",
+    errNetwork: "Network error. Please try again.",
+  },
+  confirmed: {
+    eyebrow: "Order received",
+    title: "Thank you.",
+    order: "ORDER",
+    withWa:
+      "We've opened WhatsApp so you can confirm your order with us. If it didn't open, message us anytime — we'll arrange delivery and you pay in cash when it arrives.",
+    noWa: "Your order has been recorded. We'll be in touch shortly to confirm delivery. Payment is cash on delivery.",
+    continue: "Continue shopping",
+    backHome: "Back home",
+  },
+  about: {
+    eyebrow: "The atelier",
+    titleA: "We make candles the slow way —",
+    titleB: "because it shows.",
+    intro:
+      "VASSIA is a small studio devoted to soy candles and scents. Every piece is poured by hand, in batches small enough to watch over, and finished with a marble that only the slow method allows.",
+    processEyebrow: "The process",
+    processTitleA: "Four steps,",
+    processTitleB: "none rushed.",
+    steps: [
+      {
+        t: "Slow melt",
+        d: "Soy wax is melted gently and stirred — never whipped — so no air is folded in.",
+      },
+      {
+        t: "Bound at warmth",
+        d: "We let the wax cool to the exact temperature where fragrance binds best before scenting.",
+      },
+      {
+        t: "Poured into warmed glass",
+        d: "Jars are pre-warmed so the surface sets smooth — no sinkholes, no wet spots.",
+      },
+      {
+        t: "Marbled by hand",
+        d: "After a day of curing, each candle is marbled individually. No two are the same.",
+      },
+    ],
+    quote:
+      "Curing takes one to two weeks for the best scent throw. We don't shorten it. Good things are worth the wait.",
+    quoteBy: "VASSIA Candles & Scents",
+    ctaTitleA: "Find",
+    ctaTitleB: "your scent.",
+    ctaButton: "Shop the collection",
+  },
+  contact: {
+    eyebrow: "Contact",
+    titleA: "Let's talk",
+    titleB: "scent.",
+    body: "The fastest way to order or ask a question is WhatsApp — we reply personally. You can also find us on Instagram or by email.",
+    whatsapp: "WhatsApp",
+    whatsappValue: "Message us",
+    instagram: "Instagram",
+    email: "Email",
+    open: "OPEN →",
+    codNote:
+      "Orders are delivered across Morocco with cash on delivery. Delivery times and fees are confirmed with you directly when you order.",
+  },
+  footer: {
+    tagline: "Hand-poured soy candles, made slowly and in small batches.",
+    poured: "Poured in Morocco",
+    explore: "Explore",
+    theCandles: "The candles",
+    theAtelier: "The atelier",
+    contact: "Contact",
+    contactLabel: "Contact",
+    orderWa: "Order by WhatsApp",
+    rights: "Candles & Scents",
+    madeSlowly: "Made slowly · Poured by hand",
+  },
+  notFound: {
+    code: "404",
+    title: "Lost the scent.",
+    body: "This page doesn't exist — but the collection still does.",
+    back: "Back home",
+  },
+};
+
+type Dict = typeof en;
+
+// Deep-typed French dictionary (must mirror the EN shape exactly).
+const fr: Dict = {
+  nav: {
+    shop: "Boutique",
+    atelier: "Atelier",
+    contact: "Contact",
+    journal: "Journal",
+    cart: "Panier",
+    menu: "Menu",
+  },
+  hero: {
+    eyebrow: "Soja coulé à la main · Petite série · Maroc",
+    titleA: "Éclairez les",
+    titleB: "heures calmes.",
+    body: "Des bougies de soja coulées lentement à la main, marbrées pendant le séchage et parfumées avec intention. Faites en petites séries — jamais dans la précipitation.",
+    shop: "Découvrir la collection",
+    atelier: "Notre atelier",
+    scroll: "Défiler",
+  },
+  marquee: [
+    "Coulées à la main en petites séries",
+    "100 % cire de soja",
+    "Marbrées à la main",
+    "Paiement à la livraison partout au Maroc",
+    "Commande par WhatsApp",
+  ],
+  home: {
+    signaturesEyebrow: "Les signatures",
+    signaturesTitleA: "Des senteurs qu'on retrouve,",
+    signaturesTitleB: "encore et encore.",
+    viewAll: "Voir tout",
+    noProducts:
+      "Aucun produit pour l'instant — ajoutez-les dans le tableau de bord admin.",
+    atelierEyebrow: "L'atelier",
+    atelierTitleA: "Coulées à la lisière",
+    atelierTitleB: "de la chaleur.",
+    atelierBody:
+      "Nous faisons fondre lentement, laissons la cire refroidir exactement là où le parfum se fixe le mieux, puis coulons dans un verre tiédi pour une surface lisse. Après un jour de séchage, chaque bougie est marbrée à la main — aucune n'est identique.",
+    atelierLink: "Lire le procédé",
+    familiesEyebrow: "Trouvez votre senteur",
+    familiesTitleA: "Quatre façons de",
+    familiesTitleB: "lire une pièce.",
+    families: [
+      { t: "Chaude & Résineuse", d: "Ambre, oud, tonka" },
+      { t: "Verte & Fraîche", d: "Figue, sel marin, tige" },
+      { t: "Florale & Poudrée", d: "Rose de mai, pivoine, musc" },
+      { t: "Sombre & Fumée", d: "Tabac, miel, foin" },
+    ],
+  },
+  shop: {
+    eyebrow: "Toutes les bougies · Printemps 2026",
+    titleA: "Les",
+    titleB: "Bougies",
+    subtitle:
+      "Compositions de soja coulées à la main. Chaque bougie porte une petite marque braise — la famille à laquelle elle appartient.",
+    empty: "Rien ici pour l'instant.",
+  },
+  card: {
+    bestseller: "Best-seller",
+    limited: "Édition limitée",
+    soldOut: "Épuisé",
+    soy: "Soja",
+    discover: "Découvrir",
+  },
+  product: {
+    back: "← Retour à la collection",
+    catCandle: "Bougie de soja",
+    catDiffuser: "Diffuseur à bâtonnets",
+    catAccessory: "Accessoire",
+    scentNotes: "Notes olfactives",
+    fillWeight: "Poids net",
+    burnTime: "Durée de combustion",
+    wax: "Cire",
+    waxValue: "100 % soja",
+    made: "Fabrication",
+    madeValue: "À la main, petite série",
+    careTitle: "Bien la brûler",
+    care: [
+      "Coupez la mèche à 5–6 mm avant chaque utilisation.",
+      "Première combustion : laissez le bain de cire atteindre le bord — environ une heure.",
+      "Éloignez des courants d'air ; ne brûlez jamais plus de quatre heures.",
+      "Cessez de brûler lorsqu'il reste 10 mm de cire.",
+    ],
+    related: "Vous aimerez aussi",
+    addToBag: "Ajouter au panier",
+    soldOut: "Épuisé",
+    lowStock: (n: number) => `Plus que ${n} — petite série.`,
+    decrease: "Diminuer la quantité",
+    increase: "Augmenter la quantité",
+  },
+  cart: {
+    eyebrow: "Votre panier",
+    title: "Vérifier & commander",
+    empty: "Votre panier est vide.",
+    discover: "Découvrir la collection",
+    remove: "Retirer",
+    summary: "Récapitulatif",
+    subtotal: "Sous-total",
+    delivery: "Livraison",
+    deliveryValue: "Confirmée par WhatsApp",
+    total: "Total",
+    proceed: "Passer à la commande",
+    codNote: "Paiement à la livraison · Aucune carte requise",
+  },
+  drawer: {
+    title: "Votre panier",
+    close: "Fermer",
+    empty: "Votre panier est vide",
+    discover: "Découvrir la collection",
+    remove: "Retirer",
+    subtotal: "Sous-total",
+    deliveryNote: "Livraison confirmée avec vous par WhatsApp.",
+    checkout: "Commander",
+  },
+  checkout: {
+    eyebrow: "Commande",
+    title: "Paiement à la livraison",
+    intro:
+      "Aucune carte nécessaire. Passez votre commande ci-dessous — nous confirmons les détails et la livraison directement avec vous sur WhatsApp.",
+    emptyBag: "Votre panier est vide.",
+    backToCollection: "Retour à la collection",
+    yourDetails: "Vos coordonnées",
+    fullName: "Nom complet",
+    phone: "Numéro de téléphone",
+    email: "E-mail (facultatif)",
+    delivery: "Livraison",
+    selectCity: "Choisissez votre ville",
+    address: "Adresse de livraison complète",
+    notes: "Notes de commande (facultatif)",
+    giftLegend: "Offrir en cadeau",
+    giftTitle: "Emballage cadeau & carte",
+    giftDesc: (fee: string) =>
+      `Emballé à la main avec une carte manuscrite — ${fee} ajoutés à votre commande.`,
+    giftMessage: "Votre message cadeau (facultatif) — écrit sur la carte",
+    yourOrder: "Votre commande",
+    subtotal: "Sous-total",
+    giftWrapping: "Emballage cadeau",
+    deliveryRow: "Livraison",
+    deliveryValue: "Confirmée sur WhatsApp",
+    total: "Total",
+    placing: "Commande en cours…",
+    placeOrder: "Passer la commande",
+    waNote:
+      "Vous serez redirigé vers WhatsApp pour confirmer. Paiement à la livraison.",
+    errEmpty: "Votre panier est vide.",
+    errGeneric: "Une erreur s'est produite. Veuillez réessayer.",
+    errNetwork: "Erreur réseau. Veuillez réessayer.",
+  },
+  confirmed: {
+    eyebrow: "Commande reçue",
+    title: "Merci.",
+    order: "COMMANDE",
+    withWa:
+      "Nous avons ouvert WhatsApp pour que vous puissiez confirmer votre commande. S'il ne s'est pas ouvert, écrivez-nous à tout moment — nous organisons la livraison et vous payez en espèces à la réception.",
+    noWa: "Votre commande a été enregistrée. Nous vous contacterons sous peu pour confirmer la livraison. Paiement à la livraison.",
+    continue: "Continuer mes achats",
+    backHome: "Retour à l'accueil",
+  },
+  about: {
+    eyebrow: "L'atelier",
+    titleA: "Nous faisons les bougies à la manière lente —",
+    titleB: "parce que ça se voit.",
+    intro:
+      "VASSIA est un petit studio dédié aux bougies et senteurs de soja. Chaque pièce est coulée à la main, en séries assez petites pour être surveillées, et finie d'un marbré que seule la méthode lente permet.",
+    processEyebrow: "Le procédé",
+    processTitleA: "Quatre étapes,",
+    processTitleB: "aucune précipitée.",
+    steps: [
+      {
+        t: "Fonte lente",
+        d: "La cire de soja est fondue doucement et remuée — jamais fouettée — pour n'incorporer aucun air.",
+      },
+      {
+        t: "Liée à la chaleur",
+        d: "Nous laissons la cire refroidir à la température exacte où le parfum se fixe le mieux avant de la parfumer.",
+      },
+      {
+        t: "Coulée dans un verre tiédi",
+        d: "Les pots sont préchauffés pour une surface lisse — sans creux ni auréoles.",
+      },
+      {
+        t: "Marbrée à la main",
+        d: "Après un jour de séchage, chaque bougie est marbrée individuellement. Aucune n'est pareille.",
+      },
+    ],
+    quote:
+      "Le séchage prend une à deux semaines pour la meilleure diffusion. Nous ne le raccourcissons pas. Les belles choses méritent qu'on les attende.",
+    quoteBy: "VASSIA Candles & Scents",
+    ctaTitleA: "Trouvez",
+    ctaTitleB: "votre senteur.",
+    ctaButton: "Découvrir la collection",
+  },
+  contact: {
+    eyebrow: "Contact",
+    titleA: "Parlons",
+    titleB: "senteur.",
+    body: "Le plus rapide pour commander ou poser une question, c'est WhatsApp — nous répondons personnellement. Vous nous trouvez aussi sur Instagram ou par e-mail.",
+    whatsapp: "WhatsApp",
+    whatsappValue: "Écrivez-nous",
+    instagram: "Instagram",
+    email: "E-mail",
+    open: "OUVRIR →",
+    codNote:
+      "Les commandes sont livrées partout au Maroc avec paiement à la livraison. Les délais et frais de livraison sont confirmés directement avec vous lors de la commande.",
+  },
+  footer: {
+    tagline:
+      "Bougies de soja coulées à la main, faites lentement et en petites séries.",
+    poured: "Coulées au Maroc",
+    explore: "Explorer",
+    theCandles: "Les bougies",
+    theAtelier: "L'atelier",
+    contact: "Contact",
+    contactLabel: "Contact",
+    orderWa: "Commander par WhatsApp",
+    rights: "Candles & Scents",
+    madeSlowly: "Faites lentement · Coulées à la main",
+  },
+  notFound: {
+    code: "404",
+    title: "Senteur perdue.",
+    body: "Cette page n'existe pas — mais la collection, si.",
+    back: "Retour à l'accueil",
+  },
+};
+
+const dictionaries: Record<Locale, Dict> = { en, fr };
+
+export function getDictionary(locale: Locale): Dict {
+  return dictionaries[locale] ?? dictionaries.en;
+}
+
+export type { Dict };

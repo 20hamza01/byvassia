@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useCart } from "@/lib/cart";
 import type { ProductDTO } from "@/lib/types";
+import { useT } from "./LanguageProvider";
 
 export function AddToCart({ product }: { product: ProductDTO }) {
   const add = useCart((s) => s.add);
+  const { t } = useT();
   const [qty, setQty] = useState(1);
   const soldOut = product.stock <= 0;
 
@@ -16,7 +18,7 @@ export function AddToCart({ product }: { product: ProductDTO }) {
           <button
             className="px-4 py-3 text-taupe hover:text-ink"
             onClick={() => setQty((q) => Math.max(1, q - 1))}
-            aria-label="Decrease quantity"
+            aria-label={t.product.decrease}
             disabled={soldOut}
           >
             −
@@ -25,7 +27,7 @@ export function AddToCart({ product }: { product: ProductDTO }) {
           <button
             className="px-4 py-3 text-taupe hover:text-ink"
             onClick={() => setQty((q) => Math.min(product.stock, q + 1))}
-            aria-label="Increase quantity"
+            aria-label={t.product.increase}
             disabled={soldOut}
           >
             +
@@ -49,12 +51,12 @@ export function AddToCart({ product }: { product: ProductDTO }) {
             )
           }
         >
-          {soldOut ? "Sold out" : "Add to bag"}
+          {soldOut ? t.product.soldOut : t.product.addToBag}
         </button>
       </div>
       {!soldOut && product.stock <= 6 && (
         <p className="mt-4 text-xs tracking-wide text-taupe">
-          Only {product.stock} left — small batch.
+          {t.product.lowStock(product.stock)}
         </p>
       )}
     </div>

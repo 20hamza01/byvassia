@@ -15,3 +15,4 @@ npm-debug.log*
 .vercel
 *.tsbuildinfo
 next-env.d.ts
+notes_for_claude.txt

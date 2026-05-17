@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { parseImages } from "@/lib/format";
+import { parseImages, GIFT_FEE_MAD } from "@/lib/format";
 
 function orderNumber(): string {
   const d = new Date();
@@ -26,6 +26,8 @@ export async function POST(req: Request) {
     city?: string;
     address?: string;
     notes?: string;
+    isGift?: boolean;
+    giftMessage?: string;
     items?: { productId: string; qty: number }[];
   };
 
@@ -70,6 +72,11 @@ export async function POST(req: Request) {
     });
   }
 
+  // Gift fee is authoritative here — never trust the client's amount.
+  const isGift = b.isGift === true;
+  const giftFee = isGift ? GIFT_FEE_MAD : 0;
+  const total = subtotal + giftFee;
+
   const order = await prisma.order.create({
     data: {
       orderNumber: orderNumber(),
@@ -79,9 +86,12 @@ export async function POST(req: Request) {
       city: b.city.trim(),
       address: b.address.trim(),
       notes: b.notes?.trim() || null,
+      isGift,
+      giftMessage: isGift ? b.giftMessage?.trim().slice(0, 300) || null : null,
+      giftFeeMAD: giftFee,
       subtotalMAD: subtotal,
       deliveryMAD: 0,
-      totalMAD: subtotal,
+      totalMAD: total,
       status: "NEW",
       items: { create: lineItems },
     },

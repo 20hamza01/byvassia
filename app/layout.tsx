@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Jost } from "next/font/google";
+import { getLocale } from "@/lib/locale-server";
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -33,13 +34,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
   return (
-    <html lang="en" className={`${cormorant.variable} ${jost.variable}`}>
+    <html
+      lang={locale}
+      className={`${cormorant.variable} ${jost.variable}`}
+    >
       <body className="grain">{children}</body>
     </html>
   );

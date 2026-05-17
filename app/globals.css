@@ -2,22 +2,38 @@
 
 /* ---------------------------------------------------------------------------
    VASSIA Candles & Scents — design tokens
-   Luxury / editorial: warm paper, near-black ink, sparing candle-glow gold.
+   "Candlelit Nocturne": warm paper daylight, deep espresso noir, molten gold
+   that behaves like flame. Editorial luxury, pushed to the dramatic.
 --------------------------------------------------------------------------- */
 @theme {
+  /* Daylight (browsing surfaces) */
   --color-ivory: #faf6ef;
-  --color-ivory-2: #f2ebde;
-  --color-ink: #1a1815;
+  --color-ivory-2: #f1e9da;
+  --color-ivory-3: #e9dec9;
+
+  /* Ink */
+  --color-ink: #18130d;
   --color-ink-soft: #4a443c;
+
+  /* Noir (dramatic candlelit surfaces) */
+  --color-noir: #0c0a07;
+  --color-noir-2: #16110a;
+
+  /* Flame palette */
   --color-gold: #c9a24b;
-  --color-gold-soft: #e3c98a;
+  --color-gold-soft: #e7cf94;
+  --color-ember: #d97a32;
+  --color-amber: #f0b455;
+
   --color-taupe: #8c7a63;
   --color-line: #d9cfbd;
+  --color-line-soft: #e5dccb;
 
   --font-display: var(--font-cormorant), Georgia, serif;
   --font-sans: var(--font-jost), ui-sans-serif, system-ui, sans-serif;
 
   --ease-luxe: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-flame: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 @layer base {
@@ -31,24 +47,23 @@
     background-color: var(--color-ivory);
     color: var(--color-ink);
     font-family: var(--font-sans);
-    font-feature-settings: "kern";
+    font-feature-settings: "kern", "liga", "calt";
     overflow-x: hidden;
   }
 
   ::selection {
-    background: var(--color-ink);
+    background: var(--color-ember);
     color: var(--color-ivory);
   }
 
   h1, h2, h3, h4 {
     font-family: var(--font-display);
     font-weight: 500;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
   }
 
-  /* Custom focus ring (keyboard only) */
   :focus-visible {
-    outline: 2px solid var(--color-gold);
+    outline: 2px solid var(--color-ember);
     outline-offset: 3px;
   }
 
@@ -58,48 +73,98 @@
 }
 
 @layer components {
-  /* The wide letter-spaced sans label that echoes "CANDLES & SCENTS" */
+  /* Wide letter-spaced sans label */
   .eyebrow {
     font-family: var(--font-sans);
     text-transform: uppercase;
-    letter-spacing: 0.32em;
+    letter-spacing: 0.34em;
     font-size: 0.7rem;
     font-weight: 400;
     color: var(--color-taupe);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+  /* Eyebrow with a small flame-tick before the text */
+  .eyebrow-tick::before {
+    content: "";
+    width: 1.6rem;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-ember) 60%,
+      var(--color-amber)
+    );
+    flex: none;
   }
 
+  /* Primary button — ink slab with a molten sweep on hover */
   .btn {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.6rem;
-    padding: 1rem 2.4rem;
+    padding: 1.05rem 2.5rem;
     font-family: var(--font-sans);
     text-transform: uppercase;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.24em;
     font-size: 0.72rem;
-    border: 1px solid var(--color-ink);
-    background: var(--color-ink);
     color: var(--color-ivory);
+    background: var(--color-ink);
+    border: 1px solid var(--color-ink);
     cursor: pointer;
-    transition: background 0.5s var(--ease-luxe), color 0.5s var(--ease-luxe),
-      transform 0.5s var(--ease-luxe);
+    overflow: hidden;
+    isolation: isolate;
+    transition: color 0.5s var(--ease-luxe), border-color 0.5s var(--ease-luxe);
+  }
+  .btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      105deg,
+      var(--color-ember),
+      var(--color-amber) 45%,
+      var(--color-gold-soft)
+    );
+    transform: translateY(101%);
+    transition: transform 0.6s var(--ease-luxe);
   }
   .btn:hover {
-    background: transparent;
     color: var(--color-ink);
+    border-color: var(--color-amber);
+  }
+  .btn:hover::before {
+    transform: translateY(0);
   }
   .btn-ghost {
     background: transparent;
     color: var(--color-ink);
+    border-color: var(--color-ink);
   }
   .btn-ghost:hover {
-    background: var(--color-ink);
-    color: var(--color-ivory);
+    color: var(--color-ink);
   }
   .btn:disabled {
-    opacity: 0.45;
+    opacity: 0.4;
     cursor: not-allowed;
+  }
+  .btn:disabled::before {
+    display: none;
+  }
+
+  /* On noir surfaces */
+  .btn-on-dark {
+    background: transparent;
+    color: var(--color-ivory);
+    border-color: rgba(231, 207, 148, 0.45);
+  }
+  .btn-on-dark:hover {
+    color: var(--color-noir);
+    border-color: var(--color-amber);
   }
 
   .link-underline {
@@ -109,10 +174,10 @@
     content: "";
     position: absolute;
     left: 0;
-    bottom: -2px;
+    bottom: -3px;
     height: 1px;
     width: 100%;
-    background: currentColor;
+    background: linear-gradient(90deg, var(--color-ember), var(--color-amber));
     transform: scaleX(0);
     transform-origin: right;
     transition: transform 0.5s var(--ease-luxe);
@@ -137,7 +202,49 @@
   }
   .field:focus {
     outline: none;
-    border-color: var(--color-ink);
+    border-color: var(--color-ember);
+  }
+
+  /* Molten gold text — used on accent words */
+  .text-molten {
+    background: linear-gradient(
+      100deg,
+      var(--color-ember) 0%,
+      var(--color-amber) 40%,
+      var(--color-gold-soft) 70%,
+      var(--color-ember) 100%
+    );
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: molten 9s linear infinite;
+  }
+
+  /* Hairline corner frame */
+  .frame-ticks {
+    position: relative;
+  }
+  .frame-ticks::before,
+  .frame-ticks::after {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-color: var(--color-ember);
+    pointer-events: none;
+  }
+  .frame-ticks::before {
+    top: -1px;
+    left: -1px;
+    border-top: 1px solid;
+    border-left: 1px solid;
+  }
+  .frame-ticks::after {
+    bottom: -1px;
+    right: -1px;
+    border-bottom: 1px solid;
+    border-right: 1px solid;
   }
 }
 
@@ -148,22 +255,54 @@
   inset: 0;
   z-index: 9999;
   pointer-events: none;
-  opacity: 0.035;
+  opacity: 0.04;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* The candlelight that follows the cursor (set via JS custom props) */
+.candlelight {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    340px circle at var(--cx, 50%) var(--cy, 0%),
+    rgba(240, 180, 85, 0.10),
+    rgba(217, 122, 50, 0.05) 38%,
+    transparent 62%
+  );
+  transition: opacity 0.6s ease;
+}
+
+/* Top scroll-progress ember line */
+.scroll-ember {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  z-index: 9998;
+  transform-origin: left;
+  background: linear-gradient(
+    90deg,
+    var(--color-ember),
+    var(--color-amber) 55%,
+    var(--color-gold-soft)
+  );
+  box-shadow: 0 0 10px rgba(240, 180, 85, 0.6);
 }
 
 /* Soft warm candle glow */
 .candle-glow {
   background: radial-gradient(
     closest-side,
-    rgba(201, 162, 75, 0.28),
-    rgba(201, 162, 75, 0.08) 55%,
+    rgba(240, 180, 85, 0.30),
+    rgba(217, 122, 50, 0.10) 52%,
     transparent 78%
   );
-  filter: blur(6px);
+  filter: blur(8px);
 }
 
-/* Marquee for the announcement bar */
+/* Marquee */
 @keyframes marquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
@@ -171,7 +310,38 @@
 .marquee-track {
   display: inline-flex;
   white-space: nowrap;
-  animation: marquee 38s linear infinite;
+  animation: marquee 42s linear infinite;
+}
+
+@keyframes molten {
+  to { background-position: 220% 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Living flame */
+@keyframes flame-flicker {
+  0%, 100% { transform: scale(1) translateY(0) rotate(-1deg); opacity: 0.95; }
+  25% { transform: scale(1.04, 0.97) translateY(-1px) rotate(1.5deg); opacity: 1; }
+  50% { transform: scale(0.97, 1.05) translateY(0.5px) rotate(-1.5deg); opacity: 0.9; }
+  75% { transform: scale(1.02, 0.98) translateY(-0.5px) rotate(1deg); opacity: 1; }
+}
+@keyframes flame-glow {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.08); }
+}
+@keyframes ember-rise {
+  0% { transform: translate(0, 0) scale(1); opacity: 0; }
+  10% { opacity: 1; }
+  85% { opacity: 0.7; }
+  100% { transform: translate(var(--drift, 12px), -190px) scale(0.2); opacity: 0; }
+}
+
+.reveal-mask {
+  clip-path: inset(0 0 100% 0);
 }
 
 /* Reduce motion */
@@ -182,13 +352,15 @@
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+  .candlelight { display: none; }
 }
 
 /* Thin elegant scrollbar */
-::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar { width: 11px; }
 ::-webkit-scrollbar-track { background: var(--color-ivory); }
 ::-webkit-scrollbar-thumb {
   background: var(--color-line);
   border: 3px solid var(--color-ivory);
   border-radius: 999px;
 }
+::-webkit-scrollbar-thumb:hover { background: var(--color-taupe); }

@@ -5,10 +5,12 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCart, cartSubtotal } from "@/lib/cart";
 import { formatDH } from "@/lib/format";
+import { useT } from "./LanguageProvider";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 export function CartDrawer() {
+  const { t } = useT();
   const { lines, isOpen, close, remove, setQty } = useCart();
   const subtotal = cartSubtotal(lines);
 
@@ -25,7 +27,7 @@ export function CartDrawer() {
             onClick={close}
           />
           <motion.aside
-            className="fixed right-0 top-0 z-[70] flex h-full w-full max-w-[440px] flex-col bg-ivory"
+            className="fixed right-0 top-0 z-[70] flex h-full w-full max-w-[440px] flex-col border-l border-line bg-ivory shadow-[-30px_0_60px_-30px_rgba(24,19,13,0.4)]"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
@@ -33,12 +35,12 @@ export function CartDrawer() {
             aria-label="Shopping bag"
           >
             <div className="flex items-center justify-between border-b border-line px-7 py-6">
-              <h2 className="font-display text-2xl">Your Bag</h2>
+              <h2 className="font-display text-2xl">{t.drawer.title}</h2>
               <button
                 onClick={close}
                 className="eyebrow link-underline !text-[0.66rem]"
               >
-                Close
+                {t.drawer.close}
               </button>
             </div>
 
@@ -46,14 +48,14 @@ export function CartDrawer() {
               {lines.length === 0 ? (
                 <div className="flex h-full flex-col items-center justify-center text-center">
                   <p className="font-display text-3xl italic text-taupe">
-                    Your bag is empty
+                    {t.drawer.empty}
                   </p>
                   <Link
                     href="/shop"
                     onClick={close}
                     className="btn mt-8"
                   >
-                    Discover the collection
+                    {t.drawer.discover}
                   </Link>
                 </div>
               ) : (
@@ -82,7 +84,7 @@ export function CartDrawer() {
                           </Link>
                           <button
                             onClick={() => remove(l.productId)}
-                            aria-label="Remove"
+                            aria-label={t.drawer.remove}
                             className="text-taupe transition-colors hover:text-ink"
                           >
                             ×
@@ -122,20 +124,22 @@ export function CartDrawer() {
             {lines.length > 0 && (
               <div className="border-t border-line px-7 py-7">
                 <div className="flex items-center justify-between">
-                  <span className="eyebrow">Subtotal</span>
-                  <span className="font-display text-2xl">
+                  <span className="eyebrow eyebrow-tick">
+                    {t.drawer.subtotal}
+                  </span>
+                  <span className="font-display text-2xl text-molten">
                     {formatDH(subtotal)}
                   </span>
                 </div>
                 <p className="mt-2 text-xs text-taupe">
-                  Delivery confirmed with you by WhatsApp.
+                  {t.drawer.deliveryNote}
                 </p>
                 <Link
                   href="/checkout"
                   onClick={close}
                   className="btn mt-6 w-full"
                 >
-                  Checkout
+                  {t.drawer.checkout}
                 </Link>
               </div>
             )}

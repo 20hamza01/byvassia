@@ -4,33 +4,34 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart, cartSubtotal } from "@/lib/cart";
 import { formatDH } from "@/lib/format";
+import { useT } from "@/components/LanguageProvider";
 
 export default function CartPage() {
+  const { t } = useT();
+  const c = t.cart;
   const { lines, remove, setQty } = useCart();
   const subtotal = cartSubtotal(lines);
 
   return (
-    <div className="mx-auto max-w-[1200px] px-6 pb-24 pt-36 md:px-12 md:pt-44">
-      <p className="eyebrow">Your bag</p>
-      <h1 className="mt-5 font-display text-[clamp(2.6rem,6vw,5rem)] font-light leading-[0.95]">
-        Review &amp; checkout
+    <div className="mx-auto max-w-[1200px] px-5 pb-24 pt-32 sm:px-6 md:px-12 md:pt-44">
+      <p className="eyebrow eyebrow-tick">{c.eyebrow}</p>
+      <h1 className="mt-5 font-display text-[clamp(2.2rem,6vw,5rem)] font-light leading-[0.95]">
+        {c.title}
       </h1>
 
       {lines.length === 0 ? (
-        <div className="mt-20 border-t border-line py-24 text-center">
-          <p className="font-display text-3xl italic text-taupe">
-            Your bag is empty.
-          </p>
+        <div className="mt-16 border-t border-line py-24 text-center md:mt-20">
+          <p className="font-display text-3xl italic text-taupe">{c.empty}</p>
           <Link href="/shop" className="btn mt-10">
-            Discover the collection
+            {c.discover}
           </Link>
         </div>
       ) : (
-        <div className="mt-14 grid grid-cols-1 gap-16 lg:grid-cols-[1.6fr_1fr]">
+        <div className="mt-12 grid grid-cols-1 gap-12 md:mt-14 lg:grid-cols-[1.6fr_1fr] lg:gap-16">
           <ul className="divide-y divide-line border-y border-line">
             {lines.map((l) => (
-              <li key={l.productId} className="flex gap-6 py-7">
-                <div className="relative h-36 w-28 shrink-0 overflow-hidden bg-ivory-2">
+              <li key={l.productId} className="flex gap-4 py-6 sm:gap-6 sm:py-7">
+                <div className="relative h-32 w-24 shrink-0 overflow-hidden rounded-[0.9rem] bg-ivory-2 sm:h-36 sm:w-28">
                   {l.image && (
                     <Image
                       src={l.image}
@@ -42,10 +43,10 @@ export default function CartPage() {
                   )}
                 </div>
                 <div className="flex flex-1 flex-col justify-between">
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start justify-between gap-3">
                     <Link
                       href={`/shop/${l.slug}`}
-                      className="font-display text-2xl"
+                      className="font-display text-xl sm:text-2xl"
                     >
                       {l.name}
                     </Link>
@@ -53,23 +54,23 @@ export default function CartPage() {
                       onClick={() => remove(l.productId)}
                       className="eyebrow link-underline !text-[0.62rem] text-taupe"
                     >
-                      Remove
+                      {c.remove}
                     </button>
                   </div>
                   <div className="flex items-end justify-between">
                     <div className="flex items-center border border-line">
                       <button
-                        className="px-4 py-2 text-taupe hover:text-ink"
+                        className="px-3 py-2 text-taupe hover:text-ink sm:px-4"
                         onClick={() => setQty(l.productId, l.qty - 1)}
-                        aria-label="Decrease"
+                        aria-label={t.product.decrease}
                       >
                         −
                       </button>
                       <span className="w-9 text-center text-sm">{l.qty}</span>
                       <button
-                        className="px-4 py-2 text-taupe hover:text-ink"
+                        className="px-3 py-2 text-taupe hover:text-ink sm:px-4"
                         onClick={() => setQty(l.productId, l.qty + 1)}
-                        aria-label="Increase"
+                        aria-label={t.product.increase}
                       >
                         +
                       </button>
@@ -83,28 +84,26 @@ export default function CartPage() {
             ))}
           </ul>
 
-          <aside className="h-fit border border-line p-9">
-            <h2 className="font-display text-2xl">Summary</h2>
+          <aside className="h-fit border border-line p-7 sm:p-9 lg:sticky lg:top-28">
+            <h2 className="font-display text-2xl">{c.summary}</h2>
             <div className="mt-7 space-y-4 text-sm">
               <div className="flex justify-between">
-                <span className="text-taupe">Subtotal</span>
+                <span className="text-taupe">{c.subtotal}</span>
                 <span>{formatDH(subtotal)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-taupe">Delivery</span>
-                <span className="text-taupe">Confirmed by WhatsApp</span>
+                <span className="text-taupe">{c.delivery}</span>
+                <span className="text-taupe">{c.deliveryValue}</span>
               </div>
               <div className="flex justify-between border-t border-line pt-4 font-display text-xl">
-                <span>Total</span>
-                <span>{formatDH(subtotal)}</span>
+                <span>{c.total}</span>
+                <span className="text-molten">{formatDH(subtotal)}</span>
               </div>
             </div>
             <Link href="/checkout" className="btn mt-8 w-full">
-              Proceed to checkout
+              {c.proceed}
             </Link>
-            <p className="mt-4 text-center text-xs text-taupe">
-              Pay cash on delivery · No card required
-            </p>
+            <p className="mt-4 text-center text-xs text-taupe">{c.codNote}</p>
           </aside>
         </div>
       )}
