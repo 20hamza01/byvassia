@@ -166,14 +166,15 @@ export async function sendOrderNotificationEmail(
 
   if (!apiKey || !to) {
     console.warn(
-      "[orders] Skipping notification email — RESEND_API_KEY or ORDER_NOTIFICATION_EMAIL not set.",
+      `[orders] Skipping notification email for ${order.orderNumber} — missing env: ` +
+        `${!apiKey ? "RESEND_API_KEY " : ""}${!to ? "ORDER_NOTIFICATION_EMAIL" : ""}`,
     );
     return false;
   }
 
   try {
     const resend = new Resend(apiKey);
-    const { error } = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from,
       to,
       subject: `New order ${order.orderNumber} — ${formatDH(order.totalMAD)}`,
@@ -182,12 +183,25 @@ export async function sendOrderNotificationEmail(
       replyTo: order.email || undefined,
     });
     if (error) {
-      console.error("[orders] Resend error:", error);
+      // Log full error object so Vercel logs surface name + message (e.g.
+      // "validation_error: You can only send testing emails to your own email
+      // address" when using onboarding@resend.dev to a non-owner address).
+      console.error(
+        `[orders] Resend failed for ${order.orderNumber} ` +
+          `(from=${from} to=${to}):`,
+        JSON.stringify(error),
+      );
       return false;
     }
+    console.info(
+      `[orders] Notification email sent for ${order.orderNumber} (id=${data?.id})`,
+    );
     return true;
   } catch (err) {
-    console.error("[orders] Failed to send notification email:", err);
+    console.error(
+      `[orders] Exception sending notification for ${order.orderNumber}:`,
+      err,
+    );
     return false;
   }
 }
