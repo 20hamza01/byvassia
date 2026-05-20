@@ -6,21 +6,6 @@ import Link from "next/link";
 import { useCart, cartSubtotal } from "@/lib/cart";
 import { formatDH, GIFT_FEE_MAD } from "@/lib/format";
 import { useT } from "@/components/LanguageProvider";
-import { Select } from "@/components/Select";
-
-const MOROCCAN_CITIES = [
-  "Casablanca",
-  "Rabat",
-  "Marrakech",
-  "Tanger",
-  "Fès",
-  "Agadir",
-  "Meknès",
-  "Oujda",
-  "Kénitra",
-  "Tétouan",
-  "Other",
-];
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -169,16 +154,15 @@ export default function CheckoutPage() {
               <legend className="eyebrow eyebrow-tick mb-4">
                 {c.delivery}
               </legend>
-              <Select
+              <input
                 name="city"
                 value={city}
-                onChange={setCity}
+                onChange={(e) => setCity(e.target.value)}
+                required
                 placeholder={c.selectCity}
-                ariaLabel={c.selectCity}
-                options={MOROCCAN_CITIES.map((x) => ({
-                  value: x,
-                  label: x,
-                }))}
+                aria-label={c.selectCity}
+                className="field"
+                autoComplete="address-level2"
               />
               <textarea
                 name="address"

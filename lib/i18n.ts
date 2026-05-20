@@ -1,4 +1,4 @@
-// VASSIA — lightweight bilingual dictionary (EN default, FR opt-in).
+// VASSIA — lightweight bilingual dictionary (FR default, EN opt-in).
 // Server components read the locale cookie via lib/locale-server; client
 // components use the LanguageProvider context. Product content (names,
 // descriptions, scent notes) is admin-entered and is NOT translated here.
@@ -6,11 +6,11 @@
 export type Locale = "en" | "fr";
 
 export const LOCALES: Locale[] = ["en", "fr"];
-export const DEFAULT_LOCALE: Locale = "en";
+export const DEFAULT_LOCALE: Locale = "fr";
 export const LANG_COOKIE = "vassia-lang";
 
 export function normalizeLocale(value?: string | null): Locale {
-  return value === "fr" ? "fr" : "en";
+  return value === "en" ? "en" : "fr";
 }
 
 const en = {
@@ -84,7 +84,7 @@ const en = {
     fillWeight: "Fill weight",
     burnTime: "Burn time",
     wax: "Wax",
-    waxValue: "100% soy",
+    waxValue: "100% natural soy",
     made: "Made",
     madeValue: "By hand, small batch",
     careTitle: "Burn it well",
@@ -310,7 +310,7 @@ const fr: Dict = {
     fillWeight: "Poids net",
     burnTime: "Durée de combustion",
     wax: "Cire",
-    waxValue: "100 % soja",
+    waxValue: "100 % soja naturel",
     made: "Fabrication",
     madeValue: "À la main, petite série",
     careTitle: "Bien la brûler",
