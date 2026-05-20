@@ -51,6 +51,15 @@ model Order {
   updatedAt    DateTime    @updatedAt
 }
 
+// Key/value store for app-level settings (e.g. admin password hash).
+// Used so the admin can rotate their password from the UI — falls back to
+// the ADMIN_PASSWORD env var when no row exists.
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
 model OrderItem {
   id           String  @id @default(cuid())
   order        Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
