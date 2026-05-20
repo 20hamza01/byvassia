@@ -99,18 +99,40 @@ export function Header() {
           <LanguageSwitch className="hidden sm:flex" />
           <button
             onClick={openCart}
-            className="eyebrow group flex items-center !gap-2 !text-[0.64rem] !tracking-[0.28em]"
+            className="eyebrow group relative flex items-center !gap-2 !text-[0.64rem] !tracking-[0.28em]"
             style={{ color: "inherit" }}
             aria-label={`${t.nav.cart}, ${count}`}
           >
             <span className="link-underline hidden sm:inline">
               {t.nav.cart}
             </span>
-            <span
-              className="inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[0.58rem] leading-none"
-              style={{ border: "1px solid currentColor" }}
-            >
-              {count}
+            <span className="relative inline-block">
+              <svg
+                width="20"
+                height="22"
+                viewBox="0 0 20 22"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                className="block"
+              >
+                <path d="M2.5 6.5h15l-1.1 13.2a1.5 1.5 0 0 1-1.5 1.3H5.1a1.5 1.5 0 0 1-1.5-1.3L2.5 6.5Z" />
+                <path d="M6.75 6.5V5a3.25 3.25 0 0 1 6.5 0v1.5" />
+              </svg>
+              {count > 0 && (
+                <span
+                  className="absolute -right-2 -top-1 inline-flex h-3.5 min-w-3.5 items-center justify-center rounded-full px-0.75 font-sans text-[9px] font-medium leading-none tracking-normal"
+                  style={{
+                    background: "var(--color-ink)",
+                    color: "var(--color-ivory)",
+                  }}
+                >
+                  {count}
+                </span>
+              )}
             </span>
           </button>
         </div>

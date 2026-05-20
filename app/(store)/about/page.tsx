@@ -1,7 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Reveal, RevealImage } from "@/components/Reveal";
+import { Reveal } from "@/components/Reveal";
 import { getLocale } from "@/lib/locale-server";
 import { getDictionary } from "@/lib/i18n";
 
@@ -30,16 +29,6 @@ export default async function AboutPage() {
           </p>
         </Reveal>
       </section>
-
-      <RevealImage className="relative h-[48vh] w-full md:h-[80vh]">
-        <Image
-          src="https://images.unsplash.com/photo-1596433809252-c9b0f7a92429?w=1600&q=85"
-          alt="The VASSIA atelier"
-          fill
-          sizes="100vw"
-          className="object-cover"
-        />
-      </RevealImage>
 
       {/* Process */}
       <section className="mx-auto max-w-[1500px] px-5 py-20 sm:px-6 md:px-12 md:py-40">

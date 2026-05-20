@@ -1,8 +1,8 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Hero } from "@/components/Hero";
 import { ProductCard } from "@/components/ProductCard";
-import { Reveal, RevealImage } from "@/components/Reveal";
+import { Reveal } from "@/components/Reveal";
+import { Flame } from "@/components/Flame";
 import { getFeatured } from "@/lib/products";
 import { getLocale } from "@/lib/locale-server";
 import { getDictionary } from "@/lib/i18n";
@@ -78,16 +78,24 @@ export default async function HomePage() {
           aria-hidden
         />
         <div className="relative mx-auto grid max-w-[1500px] grid-cols-1 items-stretch md:grid-cols-2">
-          <RevealImage className="relative min-h-[52vh] md:min-h-[92vh]">
-            <Image
-              src="https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=1200&q=85"
-              alt="Pouring soy wax by hand in the VASSIA atelier"
-              fill
-              sizes="(max-width:768px) 100vw, 50vw"
-              className="object-cover opacity-90"
+          <Reveal className="relative flex min-h-[52vh] items-center justify-center px-6 py-20 md:min-h-[92vh] md:py-0">
+            <span
+              className="pointer-events-none absolute left-1/2 top-1/2 h-[70%] w-[70%] -translate-x-1/2 -translate-y-1/2 rounded-full"
+              style={{
+                background:
+                  "radial-gradient(closest-side, rgba(240,180,85,0.18), rgba(217,122,50,0.06) 50%, transparent 75%)",
+                filter: "blur(20px)",
+              }}
+              aria-hidden
             />
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent to-noir/60" />
-          </RevealImage>
+            <div className="relative flex flex-col items-center">
+              <Flame className="h-[clamp(170px,20vw,280px)] w-[clamp(100px,12vw,160px)]" />
+              <div className="mt-1 h-48 w-28 rounded-[3px] bg-gradient-to-b from-ivory/85 via-ivory/70 to-ivory/40 shadow-[0_0_70px_-10px_rgba(240,180,85,0.5)] lg:h-60 lg:w-32">
+                <div className="mx-auto mt-3 h-px w-12 bg-noir/20" />
+              </div>
+              <div className="mt-[-6px] h-6 w-40 rounded-[50%] bg-gold-soft/10 blur-md" />
+            </div>
+          </Reveal>
           <div className="flex items-center px-6 py-20 sm:px-8 md:px-20 md:py-24">
             <Reveal>
               <p className="eyebrow eyebrow-tick !text-gold-soft/60">
