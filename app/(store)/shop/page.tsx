@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ProductCard } from "@/components/ProductCard";
 import { Reveal } from "@/components/Reveal";
+import { BundleOffersBanner } from "@/components/BundleOffers";
 import { getActiveProducts } from "@/lib/products";
 import { getLocale } from "@/lib/locale-server";
 import { getDictionary } from "@/lib/i18n";
@@ -17,7 +18,12 @@ export default async function ShopPage() {
   const products = await getActiveProducts("CANDLE");
 
   return (
-    <div className="mx-auto max-w-[1500px] px-5 pb-24 pt-32 sm:px-6 md:px-12 md:pt-44">
+    <div className="pt-28 md:pt-36">
+      <div className="mx-auto max-w-[1500px] px-5 sm:px-6 md:px-12">
+        <BundleOffersBanner />
+      </div>
+
+      <div className="mx-auto max-w-[1500px] px-5 pb-24 pt-14 sm:px-6 md:px-12 md:pt-20">
       <header className="mb-14 text-center md:mb-16">
         <Reveal>
           <p className="eyebrow eyebrow-tick justify-center !text-[0.62rem]">
@@ -26,7 +32,7 @@ export default async function ShopPage() {
           <h1 className="mt-7 font-display text-[clamp(3rem,12vw,9rem)] font-light leading-[0.86] tracking-[-0.02em]">
             {t.shop.titleA} <span className="text-molten">{t.shop.titleB}</span>
           </h1>
-          <p className="mx-auto mt-7 max-w-md font-display text-lg italic leading-relaxed text-taupe">
+          <p className="mx-auto mt-7 max-w-md font-display text-lg italic leading-relaxed text-ink-soft">
             {t.shop.subtitle}
           </p>
         </Reveal>
@@ -43,6 +49,7 @@ export default async function ShopPage() {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }

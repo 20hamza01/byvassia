@@ -3,8 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { useCart, cartSubtotal } from "@/lib/cart";
-import { formatDH } from "@/lib/format";
+import { useCart, cartPricing } from "@/lib/cart";
+import { formatDH, FREE_DELIVERY_CANDLES } from "@/lib/format";
 import { useT } from "./LanguageProvider";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -12,7 +12,11 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 export function CartDrawer() {
   const { t } = useT();
   const { lines, isOpen, close, remove, setQty } = useCart();
-  const subtotal = cartSubtotal(lines);
+  const pricing = cartPricing(lines);
+  const candlesUntilFreeDelivery = Math.max(
+    0,
+    FREE_DELIVERY_CANDLES - pricing.candleQty,
+  );
 
   return (
     <AnimatePresence>
@@ -122,22 +126,55 @@ export function CartDrawer() {
             </div>
 
             {lines.length > 0 && (
-              <div className="border-t border-line px-7 py-7">
-                <div className="flex items-center justify-between">
-                  <span className="eyebrow eyebrow-tick">
-                    {t.drawer.subtotal}
+              <div className="border-t border-line bg-ivory-2/50 px-7 py-6">
+                {pricing.bundleApplied && (
+                  <div className="-mx-1 mb-4 flex items-center justify-between rounded-md border border-ember/30 bg-ember/[0.07] px-3 py-2 text-[0.66rem] uppercase tracking-[0.18em] text-ember">
+                    <span>{t.drawer.bundleApplied}</span>
+                    <span className="font-semibold tracking-normal">
+                      − {formatDH(pricing.bundleSavingsMAD)}
+                    </span>
+                  </div>
+                )}
+                <dl className="space-y-1.5 text-sm">
+                  <div className="flex justify-between">
+                    <dt className="text-ink-soft">{t.drawer.subtotal}</dt>
+                    <dd className="text-ink">{formatDH(pricing.subtotalMAD)}</dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="text-ink-soft">{t.drawer.delivery}</dt>
+                    <dd
+                      className={
+                        pricing.freeDelivery
+                          ? "font-semibold tracking-[0.14em] text-ember"
+                          : "text-ink"
+                      }
+                    >
+                      {pricing.freeDelivery
+                        ? t.drawer.deliveryFree
+                        : formatDH(pricing.deliveryMAD)}
+                    </dd>
+                  </div>
+                </dl>
+                <div className="mt-3 flex items-center justify-between border-t border-line pt-3">
+                  <span className="eyebrow eyebrow-tick !text-ink/85">
+                    {t.drawer.total}
                   </span>
                   <span className="font-display text-2xl text-molten">
-                    {formatDH(subtotal)}
+                    {formatDH(pricing.totalMAD)}
                   </span>
                 </div>
-                <p className="mt-2 text-xs text-taupe">
+                {candlesUntilFreeDelivery > 0 && pricing.candleQty > 0 && (
+                  <p className="mt-3 text-xs leading-relaxed text-ember">
+                    {t.drawer.addOneForFree(candlesUntilFreeDelivery)}
+                  </p>
+                )}
+                <p className="mt-3 text-xs text-ink-soft">
                   {t.drawer.deliveryNote}
                 </p>
                 <Link
                   href="/checkout"
                   onClick={close}
-                  className="btn mt-6 w-full"
+                  className="btn mt-5 w-full"
                 >
                   {t.drawer.checkout}
                 </Link>

@@ -1,19 +1,20 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Hero } from "@/components/Hero";
-import { ProductCard } from "@/components/ProductCard";
 import { Reveal } from "@/components/Reveal";
 import { Flame } from "@/components/Flame";
-import { getFeatured } from "@/lib/products";
+import { BundleOffers } from "@/components/BundleOffers";
+import { getActiveProducts } from "@/lib/products";
 import { getLocale } from "@/lib/locale-server";
 import { getDictionary } from "@/lib/i18n";
 
-// Featured products are admin-managed and live in Neon — render per request
-// rather than prerendering at build time.
+// Products are admin-managed and live in Neon — render per request rather
+// than prerendering at build time.
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const t = getDictionary(await getLocale());
-  const featured = await getFeatured(3);
+  const overview = (await getActiveProducts()).slice(0, 4);
 
   return (
     <>
@@ -38,37 +39,57 @@ export default async function HomePage() {
         </div>
       </div>
 
-      {/* Featured */}
-      <section className="mx-auto max-w-[1500px] px-5 py-24 sm:px-6 md:px-12 md:py-40">
-        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
-          <Reveal>
-            <p className="eyebrow eyebrow-tick">{t.home.signaturesEyebrow}</p>
-            <h2 className="mt-6 max-w-2xl font-display text-[clamp(2.2rem,5.5vw,4.8rem)] font-light leading-[0.95]">
-              {t.home.signaturesTitleA}
-              <span className="italic text-molten">
-                {" "}
-                {t.home.signaturesTitleB}
-              </span>
-            </h2>
-          </Reveal>
-          <Reveal delay={0.1}>
-            <Link
-              href="/shop"
-              className="eyebrow link-underline !gap-0 !text-[0.66rem] text-ink"
-            >
-              {t.home.viewAll} →
-            </Link>
-          </Reveal>
-        </div>
+      {/* Bundle offers — pricing tiers explained in full */}
+      <BundleOffers />
 
-        <div className="mt-14 grid grid-cols-1 gap-x-7 gap-y-12 sm:grid-cols-2 sm:gap-y-16 lg:grid-cols-3">
-          {featured.map((p, i) => (
-            <ProductCard key={p.id} product={p} index={i} />
-          ))}
-          {featured.length === 0 && (
-            <p className="text-taupe">{t.home.noProducts}</p>
-          )}
-        </div>
+      {/* Collection overview */}
+      <section className="mx-auto max-w-[1500px] px-5 py-24 sm:px-6 md:px-12 md:py-40">
+        <Reveal className="text-center md:text-left">
+          <p className="eyebrow eyebrow-tick">{t.home.collectionEyebrow}</p>
+          <h2 className="mt-6 max-w-3xl font-display text-[clamp(2.2rem,5.5vw,4.8rem)] font-light leading-[0.95]">
+            {t.home.collectionTitleA}
+            <span className="italic text-molten">
+              {" "}
+              {t.home.collectionTitleB}
+            </span>
+          </h2>
+        </Reveal>
+
+        {overview.length === 0 ? (
+          <p className="mt-14 text-taupe">{t.home.noProducts}</p>
+        ) : (
+          <div className="mt-14 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 sm:gap-x-7 lg:grid-cols-4">
+            {overview.map((p, i) => (
+              <Reveal key={p.id} delay={(i % 4) * 0.08}>
+                <Link href={`/shop/${p.slug}`} className="group block">
+                  <div className="relative aspect-[4/5] overflow-hidden rounded-[1.4rem] border border-line/70 bg-ivory-2 transition-colors duration-500 group-hover:border-line">
+                    {p.images[0] && (
+                      <Image
+                        src={p.images[0]}
+                        alt={p.name}
+                        fill
+                        sizes="(max-width:640px) 50vw, (max-width:1024px) 33vw, 25vw"
+                        className="object-cover transition-transform duration-[1.5s] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
+                      />
+                    )}
+                  </div>
+                  <h3 className="mt-5 px-1 font-display text-[1.15rem] uppercase leading-none tracking-[0.04em] text-ink transition-colors duration-300 group-hover:text-ember">
+                    {p.name}
+                  </h3>
+                </Link>
+              </Reveal>
+            ))}
+          </div>
+        )}
+
+        <Reveal
+          delay={0.15}
+          className="mt-16 flex justify-center md:mt-20"
+        >
+          <Link href="/shop" className="btn">
+            {t.home.seeAllCandles}
+          </Link>
+        </Reveal>
       </section>
 
       {/* Brand story — editorial split */}

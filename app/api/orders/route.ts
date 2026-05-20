@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { parseImages, GIFT_FEE_MAD } from "@/lib/format";
+import {
+  parseImages,
+  GIFT_FEE_MAD,
+  candleSubtotalWithBundle,
+  deliveryFeeFor,
+} from "@/lib/format";
+import { sendOrderNotificationEmail } from "@/lib/email";
 
 function orderNumber(): string {
   const d = new Date();
@@ -52,7 +58,9 @@ export async function POST(req: Request) {
   });
 
   const lineItems = [];
-  let subtotal = 0;
+  let candleQty = 0;
+  let candleRegularMAD = 0;
+  let otherSubtotalMAD = 0;
   for (const it of b.items) {
     const p = products.find((x) => x.id === it.productId);
     const qty = Math.max(1, Math.floor(Number(it.qty) || 0));
@@ -62,7 +70,13 @@ export async function POST(req: Request) {
         { status: 409 },
       );
     }
-    subtotal += p.priceMAD * qty;
+    const lineTotal = p.priceMAD * qty;
+    if ((p.category || "CANDLE").toUpperCase() === "CANDLE") {
+      candleQty += qty;
+      candleRegularMAD += lineTotal;
+    } else {
+      otherSubtotalMAD += lineTotal;
+    }
     lineItems.push({
       productId: p.id,
       name: p.name,
@@ -72,10 +86,17 @@ export async function POST(req: Request) {
     });
   }
 
-  // Gift fee is authoritative here — never trust the client's amount.
+  // Bundle pricing and delivery are authoritative here — recomputed from the
+  // server-side catalogue, never trusted from the client.
+  const { subtotalMAD: candleSubtotal } = candleSubtotalWithBundle(
+    candleQty,
+    candleRegularMAD,
+  );
+  const subtotal = candleSubtotal + otherSubtotalMAD;
   const isGift = b.isGift === true;
   const giftFee = isGift ? GIFT_FEE_MAD : 0;
-  const total = subtotal + giftFee;
+  const delivery = deliveryFeeFor(candleQty);
+  const total = subtotal + delivery + giftFee;
 
   const order = await prisma.order.create({
     data: {
@@ -90,16 +111,42 @@ export async function POST(req: Request) {
       giftMessage: isGift ? b.giftMessage?.trim().slice(0, 300) || null : null,
       giftFeeMAD: giftFee,
       subtotalMAD: subtotal,
-      deliveryMAD: 0,
+      deliveryMAD: delivery,
       totalMAD: total,
       status: "NEW",
       items: { create: lineItems },
     },
   });
 
+  // Fire-and-forget owner notification. Never let an email failure break checkout.
+  void sendOrderNotificationEmail({
+    orderNumber: order.orderNumber,
+    customerName: order.customerName,
+    phone: order.phone,
+    email: order.email,
+    city: order.city,
+    address: order.address,
+    notes: order.notes,
+    isGift: order.isGift,
+    giftMessage: order.giftMessage,
+    giftFeeMAD: order.giftFeeMAD,
+    subtotalMAD: order.subtotalMAD,
+    deliveryMAD: order.deliveryMAD,
+    totalMAD: order.totalMAD,
+    bundleSavingsMAD: Math.max(0, candleRegularMAD - candleSubtotal),
+    items: lineItems.map((li) => ({
+      name: li.name,
+      qty: li.qty,
+      unitPriceMAD: li.unitPriceMAD,
+    })),
+  });
+
   return NextResponse.json({
     ok: true,
     orderNumber: order.orderNumber,
+    subtotalMAD: order.subtotalMAD,
+    deliveryMAD: order.deliveryMAD,
+    giftFeeMAD: order.giftFeeMAD,
     totalMAD: order.totalMAD,
   });
 }

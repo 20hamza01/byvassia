@@ -2,15 +2,19 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useCart, cartSubtotal } from "@/lib/cart";
-import { formatDH } from "@/lib/format";
+import { useCart, cartPricing } from "@/lib/cart";
+import { formatDH, FREE_DELIVERY_CANDLES } from "@/lib/format";
 import { useT } from "@/components/LanguageProvider";
 
 export default function CartPage() {
   const { t } = useT();
   const c = t.cart;
   const { lines, remove, setQty } = useCart();
-  const subtotal = cartSubtotal(lines);
+  const pricing = cartPricing(lines);
+  const candlesUntilFreeDelivery = Math.max(
+    0,
+    FREE_DELIVERY_CANDLES - pricing.candleQty,
+  );
 
   return (
     <div className="mx-auto max-w-[1200px] px-5 pb-24 pt-32 sm:px-6 md:px-12 md:pt-44">
@@ -84,26 +88,51 @@ export default function CartPage() {
             ))}
           </ul>
 
-          <aside className="h-fit border border-line p-7 sm:p-9 lg:sticky lg:top-28">
+          <aside className="h-fit border border-line bg-ivory-2/40 p-7 sm:p-9 lg:sticky lg:top-28">
             <h2 className="font-display text-2xl">{c.summary}</h2>
-            <div className="mt-7 space-y-4 text-sm">
+            {pricing.bundleApplied && (
+              <div className="mt-5 flex items-center justify-between rounded-md border border-ember/35 bg-ember/[0.08] px-3.5 py-2.5 text-[0.66rem] uppercase tracking-[0.18em] text-ember">
+                <span>{c.bundleApplied}</span>
+                <span className="font-semibold tracking-normal">
+                  − {formatDH(pricing.bundleSavingsMAD)}
+                </span>
+              </div>
+            )}
+            <div className="mt-6 space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-taupe">{c.subtotal}</span>
-                <span>{formatDH(subtotal)}</span>
+                <span className="text-ink-soft">{c.subtotal}</span>
+                <span className="text-ink">{formatDH(pricing.subtotalMAD)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-taupe">{c.delivery}</span>
-                <span className="text-taupe">{c.deliveryValue}</span>
+                <span className="text-ink-soft">{c.delivery}</span>
+                <span
+                  className={
+                    pricing.freeDelivery
+                      ? "font-semibold tracking-[0.14em] text-ember"
+                      : "text-ink"
+                  }
+                >
+                  {pricing.freeDelivery
+                    ? c.deliveryFree
+                    : formatDH(pricing.deliveryMAD)}
+                </span>
               </div>
+              {candlesUntilFreeDelivery > 0 && pricing.candleQty > 0 && (
+                <p className="text-xs leading-relaxed text-ember">
+                  {c.addOneForFree(candlesUntilFreeDelivery)}
+                </p>
+              )}
               <div className="flex justify-between border-t border-line pt-4 font-display text-xl">
                 <span>{c.total}</span>
-                <span className="text-molten">{formatDH(subtotal)}</span>
+                <span className="text-molten">
+                  {formatDH(pricing.totalMAD)}
+                </span>
               </div>
             </div>
             <Link href="/checkout" className="btn mt-8 w-full">
               {c.proceed}
             </Link>
-            <p className="mt-4 text-center text-xs text-taupe">{c.codNote}</p>
+            <p className="mt-4 text-center text-xs text-ink-soft">{c.codNote}</p>
           </aside>
         </div>
       )}

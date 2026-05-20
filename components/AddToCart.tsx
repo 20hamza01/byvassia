@@ -46,6 +46,7 @@ export function AddToCart({ product }: { product: ProductDTO }) {
                 priceMAD: product.priceMAD,
                 image: product.images[0] ?? "",
                 stock: product.stock,
+                category: product.category,
               },
               qty,
             )

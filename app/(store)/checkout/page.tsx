@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
-import { useCart, cartSubtotal } from "@/lib/cart";
-import { formatDH, GIFT_FEE_MAD } from "@/lib/format";
+import { useCart, cartPricing } from "@/lib/cart";
+import { formatDH, GIFT_FEE_MAD, FREE_DELIVERY_CANDLES } from "@/lib/format";
 import { useT } from "@/components/LanguageProvider";
 
 export default function CheckoutPage() {
@@ -12,14 +12,16 @@ export default function CheckoutPage() {
   const { t } = useT();
   const c = t.checkout;
   const { lines, clear } = useCart();
-  const subtotal = cartSubtotal(lines);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [city, setCity] = useState("");
   const [isGift, setIsGift] = useState(false);
   const [giftMessage, setGiftMessage] = useState("");
-  const giftFee = isGift ? GIFT_FEE_MAD : 0;
-  const total = subtotal + giftFee;
+  const pricing = cartPricing(lines, { isGift });
+  const candlesUntilFreeDelivery = Math.max(
+    0,
+    FREE_DELIVERY_CANDLES - pricing.candleQty,
+  );
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -64,6 +66,9 @@ export default function CheckoutPage() {
       const itemLines = lines
         .map((l) => `• ${l.name} ×${l.qty} — ${formatDH(l.priceMAD * l.qty)}`)
         .join("\n");
+      const serverSubtotal = data.subtotalMAD ?? pricing.subtotalMAD;
+      const serverDelivery = data.deliveryMAD ?? pricing.deliveryMAD;
+      const serverTotal = data.totalMAD ?? pricing.totalMAD;
       const giftBlock = isGift
         ? `%0A🎁 ${encodeURIComponent(
             `${c.giftWrapping} (+${formatDH(GIFT_FEE_MAD)})`,
@@ -72,12 +77,19 @@ export default function CheckoutPage() {
             ? `${encodeURIComponent(`Message : ${payload.giftMessage}`)}%0A`
             : "")
         : "";
+      const deliveryLine = `%0A${encodeURIComponent(
+        `${c.deliveryRow} : ${
+          serverDelivery === 0 ? c.deliveryFree : formatDH(serverDelivery)
+        }`,
+      )}`;
       const msg =
         `Bonjour VASSIA, je souhaite confirmer ma commande %0A%0A` +
         `*Commande ${data.orderNumber}*%0A` +
         `${encodeURIComponent(itemLines)}%0A` +
+        `%0A${encodeURIComponent(`${c.subtotal} : ${formatDH(serverSubtotal)}`)}` +
+        deliveryLine +
         giftBlock +
-        `%0A*Total : ${formatDH(data.totalMAD ?? total)}*%0A%0A` +
+        `%0A*Total : ${formatDH(serverTotal)}*%0A%0A` +
         `Nom : ${encodeURIComponent(payload.customerName)}%0A` +
         `Téléphone : ${encodeURIComponent(payload.phone)}%0A` +
         `Ville : ${encodeURIComponent(payload.city)}%0A` +
@@ -233,7 +245,7 @@ export default function CheckoutPage() {
             )}
           </div>
 
-          <aside className="order-1 h-fit border border-line p-7 sm:p-9 lg:order-2 lg:sticky lg:top-28">
+          <aside className="order-1 h-fit border border-line bg-ivory-2/40 p-7 sm:p-9 lg:order-2 lg:sticky lg:top-28">
             <h2 className="font-display text-2xl">{c.yourOrder}</h2>
             <ul className="mt-7 space-y-4 text-sm">
               {lines.map((l) => (
@@ -241,29 +253,54 @@ export default function CheckoutPage() {
                   <span className="text-ink-soft">
                     {l.name} <span className="text-taupe">×{l.qty}</span>
                   </span>
-                  <span>{formatDH(l.priceMAD * l.qty)}</span>
+                  <span className="text-ink">
+                    {formatDH(l.priceMAD * l.qty)}
+                  </span>
                 </li>
               ))}
             </ul>
+            {pricing.bundleApplied && (
+              <div className="mt-6 flex items-center justify-between rounded-md border border-ember/35 bg-ember/[0.08] px-3.5 py-2.5 text-[0.66rem] uppercase tracking-[0.18em] text-ember">
+                <span>{c.bundleApplied}</span>
+                <span className="font-semibold tracking-normal">
+                  − {formatDH(pricing.bundleSavingsMAD)}
+                </span>
+              </div>
+            )}
             <dl className="mt-6 space-y-2.5 border-t border-line pt-5 text-sm">
               <div className="flex justify-between">
-                <dt className="text-taupe">{c.subtotal}</dt>
-                <dd>{formatDH(subtotal)}</dd>
+                <dt className="text-ink-soft">{c.subtotal}</dt>
+                <dd className="text-ink">{formatDH(pricing.subtotalMAD)}</dd>
               </div>
               {isGift && (
                 <div className="flex justify-between">
-                  <dt className="text-taupe">{c.giftWrapping}</dt>
-                  <dd>{formatDH(giftFee)}</dd>
+                  <dt className="text-ink-soft">{c.giftWrapping}</dt>
+                  <dd className="text-ink">{formatDH(pricing.giftFeeMAD)}</dd>
                 </div>
               )}
-              <div className="flex justify-between text-taupe">
-                <dt>{c.deliveryRow}</dt>
-                <dd>{c.deliveryValue}</dd>
+              <div className="flex justify-between">
+                <dt className="text-ink-soft">{c.deliveryRow}</dt>
+                <dd
+                  className={
+                    pricing.freeDelivery
+                      ? "font-semibold tracking-[0.14em] text-ember"
+                      : "text-ink"
+                  }
+                >
+                  {pricing.freeDelivery
+                    ? c.deliveryFree
+                    : formatDH(pricing.deliveryMAD)}
+                </dd>
               </div>
+              {candlesUntilFreeDelivery > 0 && pricing.candleQty > 0 && (
+                <p className="text-xs leading-relaxed text-ember">
+                  {t.cart.addOneForFree(candlesUntilFreeDelivery)}
+                </p>
+              )}
             </dl>
             <div className="mt-4 flex justify-between border-t border-line pt-4 font-display text-xl">
               <span>{c.total}</span>
-              <span className="text-molten">{formatDH(total)}</span>
+              <span className="text-molten">{formatDH(pricing.totalMAD)}</span>
             </div>
             <button
               type="submit"
@@ -272,7 +309,7 @@ export default function CheckoutPage() {
             >
               {submitting ? c.placing : c.placeOrder}
             </button>
-            <p className="mt-4 text-center text-xs leading-relaxed text-taupe">
+            <p className="mt-4 text-center text-xs leading-relaxed text-ink-soft">
               {c.waNote}
             </p>
           </aside>
