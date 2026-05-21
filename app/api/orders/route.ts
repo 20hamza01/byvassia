@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
   parseImages,
@@ -57,7 +57,13 @@ export async function POST(req: Request) {
     where: { id: { in: ids }, status: "ACTIVE" },
   });
 
-  const lineItems = [];
+  const lineItems: {
+    productId: string;
+    name: string;
+    unitPriceMAD: number;
+    qty: number;
+    image: string | null;
+  }[] = [];
   let candleQty = 0;
   let candleRegularMAD = 0;
   let otherSubtotalMAD = 0;
@@ -118,28 +124,33 @@ export async function POST(req: Request) {
     },
   });
 
-  // Fire-and-forget owner notification. Never let an email failure break checkout.
-  void sendOrderNotificationEmail({
-    orderNumber: order.orderNumber,
-    customerName: order.customerName,
-    phone: order.phone,
-    email: order.email,
-    city: order.city,
-    address: order.address,
-    notes: order.notes,
-    isGift: order.isGift,
-    giftMessage: order.giftMessage,
-    giftFeeMAD: order.giftFeeMAD,
-    subtotalMAD: order.subtotalMAD,
-    deliveryMAD: order.deliveryMAD,
-    totalMAD: order.totalMAD,
-    bundleSavingsMAD: Math.max(0, candleRegularMAD - candleSubtotal),
-    items: lineItems.map((li) => ({
-      name: li.name,
-      qty: li.qty,
-      unitPriceMAD: li.unitPriceMAD,
-    })),
-  });
+  // Send the owner notification after the response is flushed. `void` on
+  // Vercel serverless kills the unawaited promise as soon as the response is
+  // returned — `after()` keeps the function alive until the email send
+  // finishes while still letting the customer's response go out instantly.
+  after(() =>
+    sendOrderNotificationEmail({
+      orderNumber: order.orderNumber,
+      customerName: order.customerName,
+      phone: order.phone,
+      email: order.email,
+      city: order.city,
+      address: order.address,
+      notes: order.notes,
+      isGift: order.isGift,
+      giftMessage: order.giftMessage,
+      giftFeeMAD: order.giftFeeMAD,
+      subtotalMAD: order.subtotalMAD,
+      deliveryMAD: order.deliveryMAD,
+      totalMAD: order.totalMAD,
+      bundleSavingsMAD: Math.max(0, candleRegularMAD - candleSubtotal),
+      items: lineItems.map((li) => ({
+        name: li.name,
+        qty: li.qty,
+        unitPriceMAD: li.unitPriceMAD,
+      })),
+    }),
+  );
 
   return NextResponse.json({
     ok: true,
