@@ -29,7 +29,7 @@ export function Reveal({
   );
 }
 
-/** Image that reveals via a clip-path wipe when scrolled into view. */
+/** Image that reveals via a clip-path wipe on mount. */
 export function RevealImage({
   children,
   className,
@@ -43,8 +43,7 @@ export function RevealImage({
     <motion.div
       className={className}
       initial={{ clipPath: "inset(0 0 100% 0)" }}
-      whileInView={{ clipPath: "inset(0 0 0% 0)" }}
-      viewport={{ once: true, margin: "-60px" }}
+      animate={{ clipPath: "inset(0 0 0% 0)" }}
       transition={{ duration: 1.3, ease: EASE, delay }}
     >
       {children}
